@@ -3,7 +3,7 @@ from wx import glcanvas
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
-from BVH import BVHNode
+from BeeVeeH.bvh_helper import BVHNode
 
 class BeeVeeHCanvas(glcanvas.GLCanvas):
 

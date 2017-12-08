@@ -1,7 +1,3 @@
-import sys
-
-sys.path = ['lib'] + sys.path
-
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
@@ -151,7 +147,7 @@ def loads(s):
     bvhlib = BVHLIB.Bvh(s)
     root = parse_bvh_node(bvhlib.get_joints()[0])
     render_frame(root, [float(f) for f in bvhlib.frames[0]])
-    return root, [[float(f) for f in frame] for frame in bvhlib.frames]
+    return root, [[float(f) for f in frame] for frame in bvhlib.frames], bvhlib.frame_time
 
 def load(file_path):
     with open(file_path, 'r') as f:
