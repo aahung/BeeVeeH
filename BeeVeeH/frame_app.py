@@ -87,9 +87,10 @@ class AppFrame(wx.Frame):
             if fileDialog.ShowModal() == wx.ID_CANCEL:
                 return
 
-            pathname = fileDialog.GetPath()
+            file_path = fileDialog.GetPath()
             try:
-                print('opening %s' % pathname)
+                print('opening %s' % file_path)
+                _thread.start_new_thread(self.play_file, (file_path, None))
             except IOError:
                 wx.LogError("Cannot open file '%s'." % pathname)
 
@@ -117,11 +118,14 @@ class AppFrame(wx.Frame):
         If test is true, after finish the playback, quit the application
         '''
         self.is_test_run = test
-        self.SetStatusText('Showing %s. Mouse left button to rotate, mouse right button to move, mouse wheel to zoom' % os.path.basename(file_path))
+        self.SetStatusText('Showing %s. Mouse left button to rotate, '
+                           'mouse right button to move, '
+                           'mouse wheel to zoom' % os.path.basename(file_path))
         self.root, self.frames, self.frame_time = BVH.load(file_path)
         self.frame_i = 0;
         self.playback_panel.set_slider_range(1, len(self.frames))
-        WorkerThread(self)
+        if not hasattr(self, 'worker_thread') or self.worker_thread is None:
+            self.worker_thread = WorkerThread(self)
 
     def play(self):
         self.is_playing = True
@@ -177,9 +181,10 @@ class WorkerThread(Thread):
         periodic_scheduler.setup(notify_window.frame_time, self.loop)
         periodic_scheduler.run()
 
-def start(file_path, test=False):
+def start(file_path=None, test=False):
     app = wx.App()
     frm = AppFrame(None, title='BeeVeeH', size=(800, 600))
     frm.Show()
-    _thread.start_new_thread(frm.play_file, (file_path, test))
+    if file_path:
+        _thread.start_new_thread(frm.play_file, (file_path, test))
     app.MainLoop()

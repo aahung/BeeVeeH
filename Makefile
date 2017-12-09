@@ -1,6 +1,9 @@
 init:
 	pip3 install -r requirements.txt -t lib
 
+run:
+	PYTHONPATH=./lib:. /usr/bin/env python3 -m main
+
 test:
 	PYTHONPATH=./lib:. /usr/bin/env python3 -m lib.pytest --ignore=lib
 
