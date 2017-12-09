@@ -44,18 +44,22 @@ class AppFrame(wx.Frame):
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         self.playback_slider = wx.Slider(playback_panel, -1, 27, 0, 100,
             style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS )
+        self.playback_slider.Bind(wx.EVT_SLIDER, self.OnPlaybackSliderChanged)
         hbox.AddSpacer(10)
-        self.play_button = wx.ToggleButton(playback_panel, -1, "pause", size=(60,-1))
+        self.play_button = wx.ToggleButton(playback_panel, -1, "Pause", size=(60,-1))
         self.play_button.SetValue(True)
-        self.play_button.Bind(wx.EVT_TOGGLEBUTTON, self.play_pause)
+        self.play_button.Bind(wx.EVT_TOGGLEBUTTON, self.OnPlayPause)
         hbox.Add(self.play_button, 0, wx.ALIGN_CENTER)
-        self.reset_button = wx.Button(playback_panel, -1, "reset", size=(50,-1))
+        self.reset_button = wx.Button(playback_panel, -1, "Reset", size=(50,-1))
+        self.reset_button.Bind(wx.EVT_BUTTON, self.OnResetFrameI)
         hbox.Add(self.reset_button, 0, wx.ALIGN_CENTER)
         hbox.Add(self.playback_slider, 1, wx.EXPAND)
         self.prev_button = wx.Button(playback_panel, -1, "<", size=(30,-1))
         self.prev_button.Enable(False)
+        self.prev_button.Bind(wx.EVT_BUTTON, self.OnPrevFrame)
         self.next_button = wx.Button(playback_panel, -1, ">", size=(30,-1))
         self.next_button.Enable(False)
+        self.next_button.Bind(wx.EVT_BUTTON, self.OnNextFrame)
         hbox.Add(self.prev_button, 0, wx.ALIGN_CENTER)
         hbox.Add(self.next_button, 0, wx.ALIGN_CENTER)
         hbox.AddSpacer(10)
@@ -93,7 +97,6 @@ class AppFrame(wx.Frame):
 
     def OnMenuExit(self, event):
         self.Close(True)
-
 
     def OnMenuOpen(self, event):
         with wx.FileDialog(self, "Open BVH file", wildcard="BVH files (*.bvh)|*.bvh",
@@ -137,11 +140,31 @@ class AppFrame(wx.Frame):
         self.playback_slider.SetRange(1, len(self.frames))
         WorkerThread(self)
 
-    def play_pause(self, event):
+    def OnPlayPause(self, event):
         if event.IsChecked():
-            self.play_button.SetLabel('pause')
+            self.prev_button.Enable(False)
+            self.next_button.Enable(False)
+            self.play_button.SetLabel('Pause')
         else:
-            self.play_button.SetLabel('play')
+            self.prev_button.Enable(True)
+            self.next_button.Enable(True)
+            self.play_button.SetLabel('Play')
+
+    def OnPlaybackSliderChanged(self, event):
+        if self.play_button.GetValue() == True:
+            return
+        self.frame_i = event.GetEventObject().GetValue() - 1
+
+    def OnResetFrameI(self, event):
+        self.frame_i = 0
+
+    def OnNextFrame(self, event):
+        self.frame_i = (self.frame_i + 1) % len(self.frames)
+
+    def OnPrevFrame(self, event):
+        self.frame_i = (self.frame_i - 1)
+        if self.frame_i < 0:
+            self.frame_i = len(self.frames) - 1
 
 class WorkerThread(Thread):
     def __init__(self, notify_window):
@@ -151,13 +174,13 @@ class WorkerThread(Thread):
 
     def loop(self):
         notify_window = self._notify_window
+        notify_window.root.load_frame(notify_window.frames[notify_window.frame_i][:]) # [:] is mandatory here
+        frame_number = notify_window.frame_i + 1
+        wx.PostEvent(self._notify_window, FrameUpdateEvent())
         if notify_window.play_button.GetValue() == False:
             return
-        BVH.render_frame(notify_window.root, notify_window.frames[notify_window.frame_i][:]) # [:] is mandatory here
-        frame_number = notify_window.frame_i + 1
         notify_window.frame_i = (notify_window.frame_i + 1) % len(notify_window.frames)
         wx.PostEvent(self._notify_window, FrameNumberUpdateEvent(frame_number))
-        wx.PostEvent(self._notify_window, FrameUpdateEvent())
 
     def run(self):
         notify_window = self._notify_window
@@ -167,7 +190,7 @@ class WorkerThread(Thread):
 
 def start(file_path, test=False):
     app = wx.App()
-    frm = AppFrame(None, title='BeeVeeH')
+    frm = AppFrame(None, title='BeeVeeH', size=(800, 600))
     frm.Show()
     _thread.start_new_thread(frm.play_file, (file_path, test))
     app.MainLoop()

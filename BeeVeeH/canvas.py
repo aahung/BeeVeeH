@@ -4,6 +4,7 @@ from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
 from BeeVeeH.bvh_helper import BVHNode
+from BeeVeeH.bvh_render import render
 
 class BeeVeeHCanvas(glcanvas.GLCanvas):
 
@@ -71,7 +72,7 @@ class BeeVeeHCanvas(glcanvas.GLCanvas):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         if self.bvh_root:
-            self.bvh_root.paint()
+            render(self.bvh_root)
 
         if self.size is None:
             self.size = self.GetClientSize()
