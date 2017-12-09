@@ -2,3 +2,4 @@ wxPython==4.0.0b2
 PyOpenGL==3.1.0
 bvh==0.3
 pytest==3.3.1
+pyinstaller==3.3

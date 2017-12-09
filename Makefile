@@ -5,7 +5,7 @@ test:
 	PYTHONPATH=./lib:. /usr/bin/env python3 -m lib.pytest --ignore=lib
 
 dist: lib
-	pyinstaller BeeVeeH.spec
+	/usr/bin/env python3 -m lib.PyInstaller BeeVeeH.spec
 
 
 
