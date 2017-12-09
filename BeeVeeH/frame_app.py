@@ -2,6 +2,7 @@ import _thread
 from threading import Thread
 import sched
 import time
+import os
 import wx
 from BeeVeeH.canvas import BeeVeeHCanvas
 import BeeVeeH.bvh_helper as BVH
@@ -39,36 +40,18 @@ class AppFrame(wx.Frame):
         
         vbox.Add(self.canvas, 1, wx.EXPAND | wx.ALL, 0)
 
-        playback_panel = wx.Panel(panel, size=(-1, 50))
-        playback_panel.SetBackgroundColour('#ededed')
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
-        self.playback_slider = wx.Slider(playback_panel, -1, 27, 0, 100,
-            style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS )
-        self.playback_slider.Bind(wx.EVT_SLIDER, self.OnPlaybackSliderChanged)
-        hbox.AddSpacer(10)
-        self.play_button = wx.ToggleButton(playback_panel, -1, "Pause", size=(60,-1))
-        self.play_button.SetValue(True)
-        self.play_button.Bind(wx.EVT_TOGGLEBUTTON, self.OnPlayPause)
-        hbox.Add(self.play_button, 0, wx.ALIGN_CENTER)
-        self.reset_button = wx.Button(playback_panel, -1, "Reset", size=(50,-1))
-        self.reset_button.Bind(wx.EVT_BUTTON, self.OnResetFrameI)
-        hbox.Add(self.reset_button, 0, wx.ALIGN_CENTER)
-        hbox.Add(self.playback_slider, 1, wx.EXPAND)
-        self.prev_button = wx.Button(playback_panel, -1, "<", size=(30,-1))
-        self.prev_button.Enable(False)
-        self.prev_button.Bind(wx.EVT_BUTTON, self.OnPrevFrame)
-        self.next_button = wx.Button(playback_panel, -1, ">", size=(30,-1))
-        self.next_button.Enable(False)
-        self.next_button.Bind(wx.EVT_BUTTON, self.OnNextFrame)
-        hbox.Add(self.prev_button, 0, wx.ALIGN_CENTER)
-        hbox.Add(self.next_button, 0, wx.ALIGN_CENTER)
-        hbox.AddSpacer(10)
-        playback_panel.SetSizer(hbox)
+        self.playback_panel = PlaybackPanel(panel, size=(-1, 50))
+        self.playback_panel.bind_events(self.OnPlaybackSliderChanged,
+                                        self.OnPlayPause,
+                                        self.OnResetFrameI,
+                                        self.OnPrevFrame,
+                                        self.OnNextFrame)
+        
 
         self.Bind(EVT_FRAME_NUMBER_UPDATE, self.OnFrameNumberUpdate)
         self.Bind(EVT_FRAME_UPDATE, self.OnFrameUpdate)
 
-        vbox.Add(playback_panel, 0, wx.EXPAND | wx.ALL, 0)
+        vbox.Add(self.playback_panel, 0, wx.EXPAND | wx.ALL, 0)
 
         panel.SetSizer(vbox)
 
@@ -121,7 +104,7 @@ class AppFrame(wx.Frame):
 
     def OnFrameNumberUpdate(self, event):
         # this update makes animation not smooth
-        self.playback_slider.SetValue(event.frame_number)
+        self.playback_panel.set_slider_value(event.frame_number)
         if event.frame_number == len(self.frames) and self.is_test_run:
             self.Close()
 
@@ -134,29 +117,34 @@ class AppFrame(wx.Frame):
         If test is true, after finish the playback, quit the application
         '''
         self.is_test_run = test
-        self.SetStatusText('Showing %s' % file_path)
+        self.SetStatusText('Showing %s. Mouse left button to rotate, mouse right button to move, mouse wheel to zoom' % os.path.basename(file_path))
         self.root, self.frames, self.frame_time = BVH.load(file_path)
         self.frame_i = 0;
-        self.playback_slider.SetRange(1, len(self.frames))
+        self.playback_panel.set_slider_range(1, len(self.frames))
         WorkerThread(self)
+
+    def play(self):
+        self.is_playing = True
+        self.playback_panel.set_state(True)
+
+    def pause(self):
+        self.is_playing = False
+        self.playback_panel.set_state(False)
 
     def OnPlayPause(self, event):
         if event.IsChecked():
-            self.prev_button.Enable(False)
-            self.next_button.Enable(False)
-            self.play_button.SetLabel('Pause')
+            self.play()
         else:
-            self.prev_button.Enable(True)
-            self.next_button.Enable(True)
-            self.play_button.SetLabel('Play')
+            self.pause()
 
     def OnPlaybackSliderChanged(self, event):
-        if self.play_button.GetValue() == True:
+        if self.is_playing == True:
             return
         self.frame_i = event.GetEventObject().GetValue() - 1
 
     def OnResetFrameI(self, event):
         self.frame_i = 0
+        wx.PostEvent(self, FrameNumberUpdateEvent(1))
 
     def OnNextFrame(self, event):
         self.frame_i = (self.frame_i + 1) % len(self.frames)
@@ -177,13 +165,14 @@ class WorkerThread(Thread):
         notify_window.root.load_frame(notify_window.frames[notify_window.frame_i][:]) # [:] is mandatory here
         frame_number = notify_window.frame_i + 1
         wx.PostEvent(self._notify_window, FrameUpdateEvent())
-        if notify_window.play_button.GetValue() == False:
+        if notify_window.is_playing == False:
             return
         notify_window.frame_i = (notify_window.frame_i + 1) % len(notify_window.frames)
         wx.PostEvent(self._notify_window, FrameNumberUpdateEvent(frame_number))
 
     def run(self):
         notify_window = self._notify_window
+        notify_window.play()
         periodic_scheduler = PeriodicScheduler()  
         periodic_scheduler.setup(notify_window.frame_time, self.loop)
         periodic_scheduler.run()
