@@ -10,7 +10,8 @@ test:
 testv:
 	PYTHONPATH=./lib:. /usr/bin/env python3 -m tests.test_app
 
-dist: lib
+dist:
+	rm -rf dist 2>/dev/null
 	/usr/bin/env python3 -m lib.PyInstaller BeeVeeH.spec
 
 
