@@ -37,8 +37,8 @@ addons:
 
 # command to install dependencies
 install:
-  - pip install -r requirements.txt -t lib
+  - make init
 
 # command to run tests
 script:
-  - python tests.py
+  - make test

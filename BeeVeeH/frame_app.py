@@ -6,6 +6,7 @@ import wx
 from BeeVeeH.canvas import BeeVeeHCanvas
 import BeeVeeH.bvh_helper as BVH
 from BeeVeeH.panel_playback import PlaybackPanel
+from BeeVeeH.events import *
 
 class PeriodicScheduler(object):                                                  
     def __init__(self):                                                           
@@ -18,7 +19,6 @@ class PeriodicScheduler(object):
                                                                         
     def run(self):                                                                
         self.scheduler.run()
-
 
 class AppFrame(wx.Frame):
     def __init__(self, *args, **kw):
@@ -44,7 +44,21 @@ class AppFrame(wx.Frame):
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         self.playback_slider = wx.Slider(playback_panel, -1, 27, 0, 100,
             style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS )
+        hbox.AddSpacer(10)
+        self.play_button = wx.ToggleButton(playback_panel, -1, "pause", size=(60,-1))
+        self.play_button.SetValue(True)
+        self.play_button.Bind(wx.EVT_TOGGLEBUTTON, self.play_pause)
+        hbox.Add(self.play_button, 0, wx.ALIGN_CENTER)
+        self.reset_button = wx.Button(playback_panel, -1, "reset", size=(50,-1))
+        hbox.Add(self.reset_button, 0, wx.ALIGN_CENTER)
         hbox.Add(self.playback_slider, 1, wx.EXPAND)
+        self.prev_button = wx.Button(playback_panel, -1, "<", size=(30,-1))
+        self.prev_button.Enable(False)
+        self.next_button = wx.Button(playback_panel, -1, ">", size=(30,-1))
+        self.next_button.Enable(False)
+        hbox.Add(self.prev_button, 0, wx.ALIGN_CENTER)
+        hbox.Add(self.next_button, 0, wx.ALIGN_CENTER)
+        hbox.AddSpacer(10)
         playback_panel.SetSizer(hbox)
 
         self.Bind(EVT_FRAME_NUMBER_UPDATE, self.OnFrameNumberUpdate)
@@ -105,32 +119,29 @@ class AppFrame(wx.Frame):
     def OnFrameNumberUpdate(self, event):
         # this update makes animation not smooth
         self.playback_slider.SetValue(event.frame_number)
+        if event.frame_number == len(self.frames) and self.is_test_run:
+            self.Close()
 
     def OnFrameUpdate(self, event):
         self.canvas.show_bvh_frame(self.root)
-        self.canvas.Refresh(False)
+        self.canvas.Refresh()
 
-    def play_file(self, file_path):
+    def play_file(self, file_path, test):
+        '''
+        If test is true, after finish the playback, quit the application
+        '''
+        self.is_test_run = test
         self.SetStatusText('Showing %s' % file_path)
         self.root, self.frames, self.frame_time = BVH.load(file_path)
         self.frame_i = 0;
         self.playback_slider.SetRange(1, len(self.frames))
         WorkerThread(self)
 
-EVT_FRAME_NUMBER_UPDATE_ID = wx.NewEventType()
-EVT_FRAME_NUMBER_UPDATE = wx.PyEventBinder(EVT_FRAME_NUMBER_UPDATE_ID, 1)
-class FrameNumberUpdateEvent(wx.PyEvent):
-    def __init__(self, frame_number):
-        wx.PyEvent.__init__(self)
-        self.SetEventType(EVT_FRAME_NUMBER_UPDATE_ID)
-        self.frame_number = frame_number
-
-EVT_FRAME_UPDATE_ID = wx.NewEventType()
-EVT_FRAME_UPDATE = wx.PyEventBinder(EVT_FRAME_UPDATE_ID, 1)
-class FrameUpdateEvent(wx.PyEvent):
-    def __init__(self):
-        wx.PyEvent.__init__(self)
-        self.SetEventType(EVT_FRAME_UPDATE_ID)
+    def play_pause(self, event):
+        if event.IsChecked():
+            self.play_button.SetLabel('pause')
+        else:
+            self.play_button.SetLabel('play')
 
 class WorkerThread(Thread):
     def __init__(self, notify_window):
@@ -140,8 +151,10 @@ class WorkerThread(Thread):
 
     def loop(self):
         notify_window = self._notify_window
+        if notify_window.play_button.GetValue() == False:
+            return
         BVH.render_frame(notify_window.root, notify_window.frames[notify_window.frame_i][:]) # [:] is mandatory here
-        frame_number = notify_window.frame_i
+        frame_number = notify_window.frame_i + 1
         notify_window.frame_i = (notify_window.frame_i + 1) % len(notify_window.frames)
         wx.PostEvent(self._notify_window, FrameNumberUpdateEvent(frame_number))
         wx.PostEvent(self._notify_window, FrameUpdateEvent())
@@ -150,11 +163,11 @@ class WorkerThread(Thread):
         notify_window = self._notify_window
         periodic_scheduler = PeriodicScheduler()  
         periodic_scheduler.setup(notify_window.frame_time, self.loop)
-        periodic_scheduler.run() 
+        periodic_scheduler.run()
 
-def start(file_path):
+def start(file_path, test=False):
     app = wx.App()
     frm = AppFrame(None, title='BeeVeeH')
     frm.Show()
-    _thread.start_new_thread(frm.play_file, (file_path,))
+    _thread.start_new_thread(frm.play_file, (file_path, test))
     app.MainLoop()
