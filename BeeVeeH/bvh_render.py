@@ -12,13 +12,18 @@ ChannelTransformFunctionMap = {
         'Zrotation': lambda x: glRotatef(x, 0.0, 0.0, 1.0)
     }
 
+class RENDER_CONFIG(object):
+    CONNECTOR_RADIUS = 1
+    JOINT_RADIUS = 2
+    HEAD_JOINT_DOUBLE_SIZE = True
+
 def render_connector(node):
     '''This function is inspired by 
     http://lifeofaprogrammergeek.blogspot.ca/2008/07/rendering-cylinder-between-two-points.html
     '''
     quadric=gluNewQuadric()
     subdivisions = 10
-    radius = 1
+    radius = RENDER_CONFIG.CONNECTOR_RADIUS
 
     x1 = 0
     y1 = 0
@@ -62,7 +67,10 @@ def render_connector(node):
     glPopMatrix();
 
 def render_end(node):
-    glutSolidSphere(1, 20, 20);
+    if RENDER_CONFIG.HEAD_JOINT_DOUBLE_SIZE and node.name == 'Head':
+        glutSolidSphere(RENDER_CONFIG.JOINT_RADIUS * 2, 20, 20);
+        return
+    glutSolidSphere(RENDER_CONFIG.JOINT_RADIUS, 20, 20);
 
 def transform_channel(channel):
     ChannelTransformFunctionMap[channel.name](channel.value)

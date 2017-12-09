@@ -11,7 +11,7 @@ from OpenGL.GLUT import *
 from OpenGL.GLU import *
 import numpy as np
 from BeeVeeH.bvh_helper import BVHNode
-from BeeVeeH.bvh_render import render
+from BeeVeeH.bvh_render import RENDER_CONFIG, render
 
 def normalize(v):
     norm = np.linalg.norm(v)
@@ -62,6 +62,8 @@ class BeeVeeHCanvas(glcanvas.GLCanvas):
         self.last_y = -1;
         self.yaw = -135.0
         self.pitch = -45.0
+
+        self.RENDER_CONFIG = RENDER_CONFIG
 
     def OnSize(self, event):
         self.size = self.GetClientSize()

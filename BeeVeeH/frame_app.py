@@ -7,6 +7,7 @@ import wx
 from BeeVeeH.canvas import BeeVeeHCanvas
 import BeeVeeH.bvh_helper as BVH
 from BeeVeeH.panel_playback import PlaybackPanel
+from BeeVeeH.panel_styling import StylingPanel
 from BeeVeeH.events import *
 
 class PeriodicScheduler(object):
@@ -47,17 +48,22 @@ class AppFrame(wx.Frame):
         vbox.Add(self.canvas, 1, wx.EXPAND | wx.ALL, 0)
 
         self.playback_panel = PlaybackPanel(panel, size=(-1, 50))
+        self.styling_panel = StylingPanel(panel, size=(-1, 50))
         self.playback_panel.bind_events(self.OnPlaybackSliderChanged,
                                         self.OnPlayPause,
                                         self.OnResetFrameI,
                                         self.OnPrevFrame,
                                         self.OnNextFrame)
+        self.styling_panel.bind_events(self.OnConnectorThinknessChanged,
+                                       self.OnJointRadiusChanged,
+                                       self.OnHeadJointDoubleSizeChanged)
         
 
         self.Bind(EVT_FRAME_NUMBER_UPDATE, self.OnFrameNumberUpdate)
         self.Bind(EVT_FRAME_UPDATE, self.OnFrameUpdate)
 
         vbox.Add(self.playback_panel, 0, wx.EXPAND | wx.ALL, 0)
+        vbox.Add(self.styling_panel, 0, wx.EXPAND | wx.ALL, 0)
 
         panel.SetSizer(vbox)
 
@@ -165,6 +171,15 @@ class AppFrame(wx.Frame):
         self.frame_i = (self.frame_i - 1)
         if self.frame_i < 0:
             self.frame_i = len(self.frames) - 1
+
+    def OnConnectorThinknessChanged(self, event):
+        self.canvas.RENDER_CONFIG.CONNECTOR_RADIUS = event.GetEventObject().GetValue() / 2
+
+    def OnJointRadiusChanged(self, event):
+        self.canvas.RENDER_CONFIG.JOINT_RADIUS = event.GetEventObject().GetValue()
+
+    def OnHeadJointDoubleSizeChanged(self, event):
+        self.canvas.RENDER_CONFIG.HEAD_JOINT_DOUBLE_SIZE = event.IsChecked()
 
 class WorkerThread(Thread):
     def __init__(self, notify_window):
