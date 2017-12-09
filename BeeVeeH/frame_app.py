@@ -9,16 +9,22 @@ import BeeVeeH.bvh_helper as BVH
 from BeeVeeH.panel_playback import PlaybackPanel
 from BeeVeeH.events import *
 
-class PeriodicScheduler(object):                                                  
-    def __init__(self):                                                           
-        self.scheduler = sched.scheduler(time.time, time.sleep)                   
-                                                                            
-    def setup(self, interval, action, actionargs=()):                             
-        action(*actionargs)                                                       
-        self.scheduler.enter(interval, 1, self.setup,                             
-                        (interval, action, actionargs))                           
-                                                                        
-    def run(self):                                                                
+class PeriodicScheduler(object):
+    def __init__(self):
+        self.scheduler = sched.scheduler(time.time, time.sleep)
+        self.interval = None
+
+    def setup(self, interval, action, actionargs=()):
+        if not self.interval:
+            self.interval = interval
+        action(*actionargs)
+        self.scheduler.enter(self.interval, 1, self.setup,
+                            (self.interval, action, actionargs))
+
+    def set_interval(self, interval):
+        self.interval = interval
+
+    def run(self):
         self.scheduler.run()
 
 class AppFrame(wx.Frame):
@@ -126,6 +132,8 @@ class AppFrame(wx.Frame):
         self.playback_panel.set_slider_range(1, len(self.frames))
         if not hasattr(self, 'worker_thread') or self.worker_thread is None:
             self.worker_thread = WorkerThread(self)
+        else:
+            self.worker_thread.set_interval(self.frame_time)
 
     def play(self):
         self.is_playing = True
@@ -177,9 +185,12 @@ class WorkerThread(Thread):
     def run(self):
         notify_window = self._notify_window
         notify_window.play()
-        periodic_scheduler = PeriodicScheduler()  
-        periodic_scheduler.setup(notify_window.frame_time, self.loop)
-        periodic_scheduler.run()
+        self.periodic_scheduler = PeriodicScheduler()  
+        self.periodic_scheduler.setup(notify_window.frame_time, self.loop)
+        self.periodic_scheduler.run()
+
+    def set_interval(self, interval):
+        self.periodic_scheduler.set_interval(interval)
 
 def start(file_path=None, test=False):
     app = wx.App()
