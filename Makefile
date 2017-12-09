@@ -12,7 +12,7 @@ testv:
 
 dist:
 	rm -rf dist 2>/dev/null
-	/usr/bin/env python3 -m lib.PyInstaller BeeVeeH.spec
+	PYTHONPATH=./lib:. /usr/bin/env python3 -m lib.PyInstaller BeeVeeH.spec
 
 
 
