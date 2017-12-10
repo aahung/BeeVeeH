@@ -47,8 +47,8 @@ class AppFrame(wx.Frame):
         
         vbox.Add(self.canvas, 1, wx.EXPAND | wx.ALL, 0)
 
-        self.playback_panel = PlaybackPanel(panel, size=(-1, 50))
-        self.styling_panel = StylingPanel(panel, size=(-1, 50))
+        self.playback_panel = PlaybackPanel(panel, size=(-1, 55))
+        self.styling_panel = StylingPanel(panel, size=(-1, 55))
         self.playback_panel.bind_events(self.OnPlaybackSliderChanged,
                                         self.OnPlayPause,
                                         self.OnResetFrameI,
