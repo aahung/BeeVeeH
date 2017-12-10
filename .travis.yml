@@ -5,10 +5,6 @@ matrix:
     - os: linux
       dist: trusty
       sudo: required
-      python: 3.4
-    - os: linux
-      dist: trusty
-      sudo: required
       python: 3.5
     - os: linux
       dist: trusty
@@ -33,7 +29,7 @@ addons:
 
 # command to install dependencies
 install:
-  - make init
+  - make init-accelerated
 
 # command to run tests
 script:

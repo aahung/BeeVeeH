@@ -47,8 +47,8 @@ class AppFrame(wx.Frame):
         
         vbox.Add(self.canvas, 1, wx.EXPAND | wx.ALL, 0)
 
-        self.playback_panel = PlaybackPanel(panel, size=(-1, 50))
-        self.styling_panel = StylingPanel(panel, size=(-1, 50))
+        self.playback_panel = PlaybackPanel(panel, size=(-1, 55))
+        self.styling_panel = StylingPanel(panel, size=(-1, 55))
         self.playback_panel.bind_events(self.OnPlaybackSliderChanged,
                                         self.OnPlayPause,
                                         self.OnResetFrameI,
@@ -94,6 +94,7 @@ class AppFrame(wx.Frame):
         self.Close(True)
 
     def OnMenuOpen(self, event):
+        self.pause()
         with wx.FileDialog(self, "Open BVH file", wildcard="BVH files (*.bvh)|*.bvh",
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST) as fileDialog:
             if fileDialog.ShowModal() == wx.ID_CANCEL:
@@ -102,9 +103,10 @@ class AppFrame(wx.Frame):
             file_path = fileDialog.GetPath()
             try:
                 print('opening %s' % file_path)
-                _thread.start_new_thread(self.play_file, (file_path, None))
+                self.play_file(file_path, None)
             except IOError:
                 wx.LogError("Cannot open file '%s'." % pathname)
+        self.play()
 
 
     def OnMenuAbout(self, event):
@@ -212,5 +214,5 @@ def start(file_path=None, test=False):
     frm = AppFrame(None, title='BeeVeeH', size=(800, 600))
     frm.Show()
     if file_path:
-        _thread.start_new_thread(frm.play_file, (file_path, test))
+        frm.play_file(file_path, test)
     app.MainLoop()

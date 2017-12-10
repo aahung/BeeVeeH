@@ -1,5 +1,7 @@
 # <img src='BeeVeeH-small.png' title='BeeVeeH' width='60' height='60' /> BeeVeeH - another BVH Player
 
+[![Build Status](https://travis-ci.org/Aahung/BeeVeeH.svg?branch=master)](https://travis-ci.org/Aahung/BeeVeeH)
+
 ![BeeVeeH Screenshot](screenshot.png)
 
 ## Development
