@@ -7,7 +7,7 @@
 ### Requirements
 
 - Python 3.x
-- pip
+- pip (>= 9.0.1, due to the [bugs in early pip versions](https://github.com/pypa/pip/issues/3826), please make sure the version of pip  is 9.0.1 or above by `pip3 --version`)
 
 If you are using macOS, you can skip this. If you are using Ubuntu, please do the following setups.
 
