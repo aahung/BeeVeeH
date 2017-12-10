@@ -37,6 +37,8 @@ Install the following packages via `apt`:
 make init
 ```
 
+This process will take a long time to finish. If you want to speed up, you can try `make init-accelerated` to download my prebuilt pip packages (I have not built them for all platforms).
+
 ### Test
 
 ```sh
