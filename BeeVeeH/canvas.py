@@ -117,6 +117,8 @@ class BeeVeeHCanvas(glcanvas.GLCanvas):
         glMatrixMode(GL_MODELVIEW) # reset to default
 
     def InitGL(self):
+        glutInit()
+
         # set viewing projection
         glShadeModel(GL_SMOOTH)
         
