@@ -1,6 +1,9 @@
 init:
 	pip3 install -r requirements.txt -t lib
 
+init-accelerated:
+	/usr/bin/env sh init-accelerated.sh
+
 run:
 	PYTHONPATH=./lib:. /usr/bin/env python3 -m main
 

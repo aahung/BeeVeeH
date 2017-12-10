@@ -29,7 +29,7 @@ addons:
 
 # command to install dependencies
 install:
-  - make init
+  - make init-accelerated
 
 # command to run tests
 script:
