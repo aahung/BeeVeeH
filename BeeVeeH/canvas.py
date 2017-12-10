@@ -64,6 +64,7 @@ class BeeVeeHCanvas(glcanvas.GLCanvas):
         self.pitch = -45.0
 
         self.RENDER_CONFIG = RENDER_CONFIG
+        self.ground_texture = None
 
     def OnSize(self, event):
         self.size = self.GetClientSize()
@@ -84,6 +85,8 @@ class BeeVeeHCanvas(glcanvas.GLCanvas):
         if not self.init:
             self.InitGL()
             self.init = True
+        if not self.ground_texture:
+            self.init_ground_texture()
         self.OnDraw()
 
     def calculate_camera(self):
@@ -125,20 +128,59 @@ class BeeVeeHCanvas(glcanvas.GLCanvas):
         glEnable(GL_LIGHTING)
         glEnable(GL_LIGHT0)
 
+    def init_ground_texture(self):
+        self.SetCurrent(self.context)
+
+        dimension = 1200
+        data = np.ndarray((dimension, dimension))
+        for i in range(dimension):
+            for j in range(dimension):
+                if (i // (dimension / 20) + j // (dimension / 20)) % 2 == 0:
+                    data[i, j] = 255
+                else:
+                    data[i, j] = 127
+        data = np.uint8(data)
+        print(data)
+        print(data.shape)
+        w, h = data.shape
+
+        self.ground_texture = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, self.ground_texture)
+
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0,
+                     GL_LUMINANCE, GL_UNSIGNED_BYTE, data)
+
+    def draw_ground(self):
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, self.ground_texture)
+        glColor3f(1, 1, 1)
+
+        length = 400.0
+
+        glBegin(GL_QUADS)
+        glTexCoord2f(0, 1)
+        glVertex3f(-length / 2, 0, length / 2)
+        glTexCoord2f(0, 0)
+        glVertex3f(-length / 2, 0, -length / 2)
+        glTexCoord2f(1, 0)
+        glVertex3f(length / 2, 0, -length / 2)
+        glTexCoord2f(1, 1)
+        glVertex3f(length / 2, 0, length / 2)
+        glEnd()
+
+        glDisable(GL_TEXTURE_2D)
+
     def OnDraw(self):
         # clear color and depth buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        
-        for i in range(-10, 11):
-            glBegin(GL_LINES)
-            glVertex3f(i * 20, 0, -200);
-            glVertex3f(i * 20, 0, 200);
-            glEnd()
-            glBegin(GL_LINES)
-            glVertex3f(-200, 0, i * 20);
-            glVertex3f(200, 0, i * 20);
-            glEnd()
-        
+
+        self.draw_ground()
  
         if self.bvh_root:
             render(self.bvh_root)
