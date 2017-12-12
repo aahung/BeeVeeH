@@ -57,17 +57,20 @@ class BVHNode(object):
         for child in self.children:
             child.load_frame(frame_data_array)
 
-    def apply_transformation(self, parent_tran_matrix=np.identity(4), parent_coordinates=np.zeros((3,1))):
-        self.coordinates = parent_coordinates + np.array([[self.offsets[0]],
-                                                          [self.offsets[1]],
-                                                          [self.offsets[2]]])
+    def apply_transformation(self, parent_tran_matrix=np.identity(4)):
+        self.coordinates = np.zeros((3,1))
+        local_translation = np.array([[1, 0, 0, self.offsets[0]],
+                                     [0, 1, 0, self.offsets[1]],
+                                     [0, 0, 1, self.offsets[2]],
+                                     [0, 0, 0, 1]])
         tran_matrix = np.identity(4)
-        for channel in self.channels[3:]:
-            tran_matrix = np.dot(channel.matrix(), tran_matrix)
-        tran_matrix = np.dot(parent_tran_matrix, tran_matrix)
-        for child in self.children:
-            child.apply_transformation(tran_matrix, self.coordinates)
+        tran_matrix = np.dot(tran_matrix, parent_tran_matrix)
+        tran_matrix = np.dot(tran_matrix, local_translation)
+        for channel in self.channels:
+            tran_matrix = np.dot(tran_matrix, channel.matrix())
         self.coordinates = np.dot(tran_matrix, np.append(self.coordinates, [[1]], axis=0))[:3]
+        for child in self.children:
+            child.apply_transformation(tran_matrix)
 
     def str(self, show_coordinates=False):
         s = 'Node({name}), offset({offset})\n'\

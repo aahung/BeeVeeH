@@ -18,14 +18,20 @@ class TestCase():
             assert(abs(np.linalg.norm(child.offsets) - np.linalg.norm(node.coordinates - child.coordinates)) < 0.0001) 
             TestCase.check_bvh_node_distance_against_parent(child)
 
+    def check_bvh_node_above_ground(node):
+        for child in node.children:
+            assert(node.coordinates[1] >= 0) 
+            TestCase.check_bvh_node_above_ground(child)
+
     def test_bvh_load_frame(self):
         file_path = '%s/rotate_hip.bvh' % BVH_DIR
         self.root, self.frames, self.frame_time = BVH.load(file_path)
         assert(len(self.frames) == 15)
         assert(self.frame_time == 1.8333)
-        for frame in self.frames:
+        for frame in self.frames[0:1]:
             self.root.load_frame(frame)
             self.root.apply_transformation()
+            print(self.root.str(True))
             TestCase.check_bvh_node_distance_against_parent(self.root)
 
     def test_bvh_load_frame2(self):
@@ -37,3 +43,4 @@ class TestCase():
             self.root.load_frame(frame)
             self.root.apply_transformation()
             TestCase.check_bvh_node_distance_against_parent(self.root)
+            TestCase.check_bvh_node_above_ground(self.root)

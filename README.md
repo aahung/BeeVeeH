@@ -83,7 +83,7 @@ root.apply_transformation()
 print(root.str(show_coordinates=True))
 
 # Node(Hips), offset(0.0, 0.0, 0.0)
-#     World coordinates: (0.00, 0.00, 0.00)
+#     World coordinates: (18.94, 35.04, -9.44)
 #     Channels:
 #         Channel(Xposition) = 18.9393
 #         Channel(Yposition) = 35.0369
@@ -92,17 +92,16 @@ print(root.str(show_coordinates=True))
 #         Channel(Yrotation) = 71.8402
 #         Channel(Zrotation) = -35.4585
 #     Node(LeftUpLeg), offset(3.31716, 0.0, 0.0)
-#         World coordinates: (0.84, -0.60, -3.15)
+#         World coordinates: (19.78, 34.91, -12.65)
 #         Channels:
 #             Channel(Xrotation) = -5.7958
 #             Channel(Yrotation) = 9.0163
 #             Channel(Zrotation) = -0.8796
 #         Node(LeftLeg), offset(0.0, -16.62131, 0.0)
-#             World coordinates: (-14.40, -6.55, -6.09)
+#             World coordinates: (18.36, 18.36, -12.10)
 #             Channels:
 #                 Channel(Xrotation) = 9.3583
-#                 Channel(Yrotation) = -0.0
-#                 Channel(Zrotation) = 0.0
+#                 ...
 
 
 node = root.children[1]
@@ -110,7 +109,7 @@ print('The world coordinates of JOINT %s at frames[4] is (%.2f, %.2f, %.2f)' \
 	   % (node.name, node.coordinates[0], 
 	      node.coordinates[1], node.coordinates[2]))
 
-# The world coordinates of JOINT RightUpLeg at frames[4] is (-0.84, 0.60, 3.15)
+# The world coordinates of JOINT RightUpLeg at frames[4] is (18.10, 35.16, -6.24)
 ```
 
 ### Functions
