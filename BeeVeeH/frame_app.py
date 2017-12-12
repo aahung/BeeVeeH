@@ -136,6 +136,8 @@ class AppFrame(wx.Frame):
                            'mouse right button to move, '
                            'mouse wheel to zoom' % os.path.basename(file_path))
         self.root, self.frames, self.frame_time = BVH.load(file_path)
+        if self.is_test_run:
+            self.frames = self.frames[:100]
         self.frame_i = 0;
         self.playback_panel.set_slider_range(1, len(self.frames))
         if not hasattr(self, 'worker_thread') or self.worker_thread is None:
