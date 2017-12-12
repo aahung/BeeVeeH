@@ -1,6 +1,34 @@
 import bvh as BVHLIB
+import math
+import numpy as np
 
 class BVHChannel(object):
+    ChannelTransformMatrixMap = {
+            'Xposition': lambda x: np.array([[1, 0, 0, x],
+                                             [0, 1, 0, 0],
+                                             [0, 0, 1, 0],
+                                             [0, 0, 0, 1]]),
+            'Yposition': lambda x: np.array([[1, 0, 0, 0],
+                                             [0, 1, 0, x],
+                                             [0, 0, 1, 0],
+                                             [0, 0, 0, 1]]),
+            'Zposition': lambda x: np.array([[1, 0, 0, 0],
+                                             [0, 1, 0, 0],
+                                             [0, 0, 1, x],
+                                             [0, 0, 0, 1]]),
+            'Xrotation': lambda x: np.array([[1, 0, 0, 0],
+                                             [0, math.cos(math.radians(x)), -math.sin(math.radians(x)), 0],
+                                             [0, math.sin(math.radians(x)), math.cos(math.radians(x)), 0],
+                                             [0, 0, 0, 1]]),
+            'Yrotation': lambda x: np.array([[math.cos(math.radians(x)), 0, math.sin(math.radians(x)), 0],
+                                             [0, 1, 0, 0],
+                                             [-math.sin(math.radians(x)), 0, math.cos(math.radians(x)), 0],
+                                             [0, 0, 0, 1]]),
+            'Zrotation': lambda x: np.array([[math.cos(math.radians(x)), -math.sin(math.radians(x)), 0, 0],
+                                             [math.sin(math.radians(x)), math.cos(math.radians(x)), 0, 0],
+                                             [0, 0, 1, 0],
+                                             [0, 0, 0, 1]])
+        }
     def __init__(self, name):
         super().__init__()
         self.name = name
@@ -8,6 +36,9 @@ class BVHChannel(object):
 
     def set_value(self, value):
         self.value = value
+
+    def matrix(self):
+        return BVHChannel.ChannelTransformMatrixMap[self.name](self.value)
 
     def str(self):
         return 'Channel({name}) = {value}'.format(name=self.name, value=self.value)
@@ -26,15 +57,34 @@ class BVHNode(object):
         for child in self.children:
             child.load_frame(frame_data_array)
 
-    def str(self):
+    def apply_transformation(self, parent_tran_matrix=np.identity(4), parent_coordinates=np.zeros((3,1))):
+        self.coordinates = parent_coordinates + np.array([[self.offsets[0]],
+                                                          [self.offsets[1]],
+                                                          [self.offsets[2]]])
+        tran_matrix = np.identity(4)
+        for channel in self.channels[3:]:
+            tran_matrix = np.dot(channel.matrix(), tran_matrix)
+        tran_matrix = np.dot(parent_tran_matrix, tran_matrix)
+        for child in self.children:
+            child.apply_transformation(tran_matrix, self.coordinates)
+        self.coordinates = np.dot(tran_matrix, np.append(self.coordinates, [[1]], axis=0))[:3]
+
+    def str(self, show_coordinates=False):
         s = 'Node({name}), offset({offset})\n'\
                 .format(name=self.name,
                         offset=', '.join([str(o) for o in self.offsets]))
+        if show_coordinates:
+            try:
+                s = s + '\tWorld coordinates: (%.2f, %.2f, %.2f)\n' % (self.coordinates[0],
+                                                                       self.coordinates[1],
+                                                                       self.coordinates[2])
+            except Exception as e:
+                print('World coordinates is not available, call apply_transformation() first')
         s = s + '\tChannels:\n'
         for channel in self.channels:
             s = s + '\t\t' + channel.str() + '\n'
         for child in self.children:
-            lines = child.str().split('\n')
+            lines = child.str(show_coordinates=show_coordinates).split('\n')
             for line in lines:
                 s = s + '\t' + line + '\n'
         return s
