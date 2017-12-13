@@ -4,7 +4,11 @@
 
 ![BeeVeeH Screenshot](screenshot.png)
 
+
+
 ## Development
+
+
 
 ### Requirements
 
@@ -30,8 +34,9 @@ Install the following packages via `apt`:
 - libgtk-3-dev
 - libwebkitgtk-3.0-dev
 
-### Setup
 
+
+### Setup
 
 ```sh
 make init
@@ -66,6 +71,8 @@ This will generate the packed BeeVeeH inside the `./dist` directory.
 ## APIs
 
 You might find BeeVeeH's classes `BVHNode` and `BVHChannel` useful for parsing and world coordinate extraction. 
+
+
 
 ### Quickstart
 
@@ -112,49 +119,89 @@ print('The world coordinates of JOINT %s at frames[4] is (%.2f, %.2f, %.2f)' \
 # The world coordinates of JOINT RightUpLeg at frames[4] is (18.10, 35.16, -6.24)
 ```
 
+
 ### Functions
 
-`BVH.loads`(string)
+#### `BVH.loads`(string): (`BVH.BVHNode`, `[[float]]`, `float`)
 
-`BVH.load`(file_path)
+`BVH.loads()` will parse a string (in BVH format) and return the root node, frames and time between two frames. Each frame is one sample of motion data in the form of a float list. The float numbers appear in the order of the channels.
 
-### Class BVH.BVHNode
+#### `BVH.load`(file_path): (`BVH.BVHNode`, `[[float]]`, `float`)
 
-#### Properties
+`BVH.load()` will parse a BVH file and return the root node, frames and time between two frames. Refer to `BVH.loads` for more details.
 
-`name`
 
-`children`
 
-`channels`
-
-`offsets`
-
-`coordinates`
-
-#### Methods
-`__init__`(self, name, offsets, channel_names, children)
-
-`load_frame`(self, frame\_data_array)
-
-`apply_transformation`(self, parent\_tran\_matrix=np.identity(4), parent_coordinates=np.zeros((3,1)))
-
-`str`(self, show_coordinates=False)
-
-### Class BVH.BVHChannel
+### Class `BVH.BVHNode`
 
 #### Properties
 
-`name`
+##### `name`: `string` 
 
-`value`
+the name of the node.
+
+##### `children`: `[BVH.BVHNode]` 
+
+the list of children nodes.
+
+##### `channels`: `[BVH.BVHChannel]` 
+
+the list of channels. Accessing `channel.value` requires calling `BVH.BVHNode.load_frame()` first.
+
+##### `offsets`: `[float]` 
+
+the offsets, in the form of [x, y, z].
+
+##### `coordinates`: `numpy.ndarray`
+
+the world coordinates, with shape=(3, 1). Accessing it requires calling `BVH.BVHNode.load_frame()` and `BVH.BVHNode.apply_transformation()` first.
 
 #### Methods
 
-`__init__`(self, name)
+##### `__init__`(self, name, offsets, channel_names, children)
 
-`set_value`(self, value)
+Constructor. 
 
-`matrix`(self)
+##### `load_frame`(self, frame\_data_array)
 
-`str`(self)
+`load_frame()` assigns a frame. It will map the motion data to each channel. You can get the list of "frame\_data_array" from `BVH.load()` or `BVH.loads()`.
+
+##### `apply_transformation`(self, parent\_tran\_matrix=np.identity(4))
+
+`apply_transformation()` starts the calculation of world coordinates. Call this method on the root BVHNode only (no parameter needed).
+
+##### `str`(self, show_coordinates=False): `string`
+
+`str()` returns a readable string containing information about the node and its childrens. Before setting `show_coordinates=True`, make sure call `BVH.BVHNode.load_frame()` and `BVH.BVHNode.apply_transformation()` first.
+
+
+
+### Class `BVH.BVHChannel`
+
+#### Properties
+
+##### `name`: `string`
+
+the name of the channel.
+
+##### `value`: `float`
+
+the value of the channel, in degree when the channel represents a rotation. Accessing it requires calling `BVH.BVHNode.load_frame()` first.
+
+#### Methods
+
+##### `__init__`(self, name)
+
+Constructor.
+
+##### `set_value`(self, value)
+
+`set_value()` is the setter for `value`.
+
+##### `matrix`(self): `numpy.ndarray`
+
+`matrix()` returns the transformation matrix of the channel.
+
+##### `str`(self)
+
+`str()` returns a readable string containing information about the channel.
