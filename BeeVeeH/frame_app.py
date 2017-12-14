@@ -225,7 +225,7 @@ class WorkerThread(Thread):
         notify_window = self._notify_window
         if not notify_window.frames:
             return
-            notify_window.root.load_frame(notify_window.frames[notify_window.frame_i][:]) # [:] is mandatory here
+        notify_window.root.load_frame(notify_window.frames[notify_window.frame_i][:]) # [:] is mandatory here
         frame_number = notify_window.frame_i + 1
         wx.PostEvent(self._notify_window, FrameUpdateEvent())
         if notify_window.is_playing == False:
