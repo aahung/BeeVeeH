@@ -49,11 +49,13 @@ class AppFrame(wx.Frame):
 
         self.playback_panel = PlaybackPanel(panel, size=(-1, 55))
         self.styling_panel = StylingPanel(panel, size=(-1, 55))
+        self.playback_panel.set_speed(1)
         self.playback_panel.bind_events(self.OnPlaybackSliderChanged,
                                         self.OnPlayPause,
                                         self.OnResetFrameI,
                                         self.OnPrevFrame,
-                                        self.OnNextFrame)
+                                        self.OnNextFrame,
+                                        self.OnSpeedChosen)
         self.styling_panel.bind_events(self.OnConnectorThinknessChanged,
                                        self.OnJointRadiusChanged,
                                        self.OnHeadJointDoubleSizeChanged)
@@ -184,6 +186,10 @@ class AppFrame(wx.Frame):
 
     def OnHeadJointDoubleSizeChanged(self, event):
         self.canvas.RENDER_CONFIG.HEAD_JOINT_DOUBLE_SIZE = event.IsChecked()
+
+    def OnSpeedChosen(self, event):
+        self.speed = self.playback_panel.get_speed()
+        self.worker_thread.set_interval(self.frame_time / self.speed)
 
 class WorkerThread(Thread):
     def __init__(self, notify_window):

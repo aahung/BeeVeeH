@@ -10,6 +10,9 @@ class PlaybackPanel(wx.Panel):
         self.playback_slider = wx.Slider(self, -1, 27, 0, 100,
                 style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
 
+        self.speed_choice = wx.Choice(self, -1, size=(60,-1),
+                                      choices=['1/8x', '1/4x', '1/2x', '1x',
+                                               '2x', '4x', '8x'])
 
         self.play_button = wx.ToggleButton(self, -1, "Pause", size=(60,-1))
         self.play_button.SetValue(True)
@@ -25,25 +28,46 @@ class PlaybackPanel(wx.Panel):
 
         hbox.AddSpacer(10)
         hbox.Add(self.play_button, 0, wx.ALIGN_CENTER)
+        hbox.AddSpacer(5)
         hbox.Add(self.reset_button, 0, wx.ALIGN_CENTER)
+        hbox.AddSpacer(5)
         hbox.Add(self.playback_slider, 1, wx.EXPAND)
+        hbox.AddSpacer(5)
+        hbox.Add(wx.StaticText(self, -1, 'Speed: '), 0, wx.ALIGN_CENTER)
+        hbox.Add(self.speed_choice, 0, wx.ALIGN_CENTER)
+        hbox.AddSpacer(5)
         hbox.Add(self.prev_button, 0, wx.ALIGN_CENTER)
         hbox.Add(self.next_button, 0, wx.ALIGN_CENTER)
         hbox.AddSpacer(10)
 
         self.SetSizer(hbox)
 
+    def set_speed(self, speed):
+        string = '%dx' % round(speed)
+        if speed < 1:
+            string = '1/%dx' % (round(1 / speed),)
+        index = self.speed_choice.FindString(string)
+        assert(index != wx.NOT_FOUND)
+        self.speed_choice.SetSelection(index)
+
+    def get_speed(self):
+        index = self.speed_choice.GetSelection()
+        string = self.speed_choice.GetString(index).split('x')[0]
+        return eval(string)
+
     def bind_events(self,
                     OnPlaybackSliderChanged,
                     OnPlayPause,
                     OnResetFrameI,
                     OnPrevFrame,
-                    OnNextFrame):
+                    OnNextFrame,
+                    OnSpeedChosen):
         self.playback_slider.Bind(wx.EVT_SLIDER, OnPlaybackSliderChanged)
         self.play_button.Bind(wx.EVT_TOGGLEBUTTON, OnPlayPause)
         self.reset_button.Bind(wx.EVT_BUTTON, OnResetFrameI)
         self.prev_button.Bind(wx.EVT_BUTTON, OnPrevFrame)
         self.next_button.Bind(wx.EVT_BUTTON, OnNextFrame)
+        self.speed_choice.Bind(wx.EVT_CHOICE, OnSpeedChosen)
 
     def set_state(self, is_playing):
         if is_playing:
