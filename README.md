@@ -3,6 +3,11 @@
 [![Build Status](https://travis-ci.org/Aahung/BeeVeeH.svg?branch=master)](https://travis-ci.org/Aahung/BeeVeeH)
 [![Coverage Status](https://coveralls.io/repos/github/Aahung/BeeVeeH/badge.svg?branch=master)](https://coveralls.io/github/Aahung/BeeVeeH?branch=master)
 [![Dependency Status](https://beta.gemnasium.com/badges/github.com/Aahung/BeeVeeH.svg)](https://beta.gemnasium.com/projects/github.com/Aahung/BeeVeeH)
+[![GitHub license](https://img.shields.io/github/license/Aahung/BeeVeeH.svg)](https://github.com/Aahung/BeeVeeH/blob/master/LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/aahung/beeveeh.svg)](https://github.com/Aahung/BeeVeeH/commits/master)
+[![GitHub top language](https://img.shields.io/github/languages/top/aahung/beeveeh.svg)](#)
+[![GitHub repo size in bytes](https://img.shields.io/github/repo-size/aahung/beeveeh.svg)](https://github.com/Aahung/BeeVeeH/archive/master.zip)
+[![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/aahung/beeveeh.svg)](https://github.com/Aahung/BeeVeeH/releases)
 
 - Table of Content
   - [Development](#development)
