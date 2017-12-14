@@ -6,7 +6,7 @@ block_cipher = None
 a = Analysis(['main.py'],
              pathex=['lib', '.'],
              binaries=[],
-             datas=[],
+             datas=[('glut.dll', '.'), ('glut32.dll', '.')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -23,7 +23,8 @@ exe = EXE(pyz,
           debug=False,
           strip=False,
           upx=True,
-          console=False )
+          console=False,
+          icon='BeeVeeH.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

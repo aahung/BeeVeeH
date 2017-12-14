@@ -57,32 +57,60 @@ Install the following packages via `apt`:
 
 ### Setup
 
+#### macOS/Ubuntu
 ```sh
 make init
 ```
 
-This process will take a long time to finish. If you want to speed up, you can try `make init-accelerated` to download my prebuilt pip packages (I have not built them for all platforms).
+This process will take a long time to finish on Ubuntu. If you want to speed up, you can try `make init-accelerated` to download my prebuilt pip packages (I have not built them for all platforms). 
+
+#### Windows
+
+```sh
+pip install -r requirements.txt -t lib
+```
 
 ### Test
 
+#### macOS/Ubuntu
 ```sh
 make test
+```
+
+#### Windows
+
+```sh
+$env:PYTHONPATH=".\lib"
+python -m lib.pytest --ignore=lib
 ```
 
 This will run the tests including playing a short sample BVH file.
 
 ### Run
 
+#### macOS/Ubuntu
 ```sh
 make run
+```
+
+#### Windows
+```sh
+python -m main
 ```
 
 This is the launch the main entry of BeeVeeH.
 
 or,
 
+#### macOS/Ubuntu
 ```sh
 make dist
+```
+#### Windows
+```sh
+$env:PYTHONPATH=""
+pip install PyInstaller==3.3
+PyInstaller BeeVeeH.spec
 ```
 
 This will generate the packed BeeVeeH inside the `./dist` directory.
