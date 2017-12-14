@@ -14,8 +14,11 @@ class PeriodicScheduler(object):
     def __init__(self):
         self.scheduler = sched.scheduler(time.time, time.sleep)
         self.interval = None
+        self.stop = False
 
     def setup(self, interval, action, actionargs=()):
+        if self.stop:
+            return
         if not self.interval:
             self.interval = interval
         action(*actionargs)
@@ -119,6 +122,11 @@ class AppFrame(wx.Frame):
     def GetGLExtents(self):
         return self.GetClientSize()
 
+    def Close(self):
+        if hasattr(self, 'worker_thread') and self.worker_thread is not None:
+            self.worker_thread.stop()
+        super(wx.Frame, self).Close()
+
     def OnFrameNumberUpdate(self, event):
         # this update makes animation not smooth
         self.playback_panel.set_slider_value(event.frame_number)
@@ -216,6 +224,9 @@ class WorkerThread(Thread):
 
     def set_interval(self, interval):
         self.periodic_scheduler.set_interval(interval)
+
+    def stop(self):
+        self.periodic_scheduler.stop = True
 
 def start(file_path=None, test=False):
     app = wx.App()
