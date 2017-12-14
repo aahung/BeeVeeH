@@ -30,8 +30,13 @@ addons:
 # command to install dependencies
 install:
   - make init-accelerated
+  - pip install coveralls
 
 # command to run tests
 script:
   - make test
   - make dist
+
+after_success:
+  - PYTHONPATH=./lib:. coverage run --source=BeeVeeH -m lib.pytest --ignore=lib
+  - coveralls
