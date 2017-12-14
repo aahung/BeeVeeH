@@ -62,7 +62,7 @@ This process will take a long time to finish. If you want to speed up, you can t
 make test
 ```
 
-This will play a short sample BVH file. After completion, BeeVeeH will close automatically.
+This will run the tests including playing a short sample BVH file.
 
 ### Run
 

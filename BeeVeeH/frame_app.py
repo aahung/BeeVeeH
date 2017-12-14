@@ -229,9 +229,15 @@ class WorkerThread(Thread):
         self.periodic_scheduler.stop = True
 
 def start(file_path=None, test=False):
-    app = wx.App()
+    try:
+        app = wx.App()
+    except SystemExit as e:
+        # no display
+        print(e)
+        return False
     frm = AppFrame(None, title='BeeVeeH', size=(800, 600))
     frm.Show()
     if file_path:
         frm.play_file(file_path, test)
     app.MainLoop()
+    return True
