@@ -1,4 +1,5 @@
 import wx
+from BeeVeeH.widget_progress_slider_bar import ProgressSliderBar
 
 class PlaybackPanel(wx.Panel):
     def __init__(self, *args, **kw):
@@ -7,8 +8,7 @@ class PlaybackPanel(wx.Panel):
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.playback_slider = wx.Slider(self, -1, 27, 0, 100,
-                style=wx.SL_HORIZONTAL | wx.SL_AUTOTICKS | wx.SL_LABELS)
+        self.playback_slider = ProgressSliderBar(self, -1, 27, 0, 100)
 
         self.speed_choice = wx.Choice(self, -1, size=(60,-1),
                                       choices=['1/8x', '1/4x', '1/2x', '1x',
@@ -84,3 +84,6 @@ class PlaybackPanel(wx.Panel):
 
     def set_slider_value(self, value):
         self.playback_slider.SetValue(value)
+
+    def GetLoop(self):
+        return self.playback_slider.GetLoop()

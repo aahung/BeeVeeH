@@ -179,12 +179,14 @@ class AppFrame(wx.Frame):
         wx.PostEvent(self, FrameNumberUpdateEvent(1))
 
     def OnNextFrame(self, event):
-        self.frame_i = (self.frame_i + 1) % len(self.frames)
+        self.frame_i = self.frame_i + 1
+        if self.frame_i > min(len(self.frames) - 1, self.playback_panel.GetLoop()[1] - 1):
+            self.frame_i = min(len(self.frames) - 1, self.playback_panel.GetLoop()[1] - 1)
 
     def OnPrevFrame(self, event):
         self.frame_i = (self.frame_i - 1)
-        if self.frame_i < 0:
-            self.frame_i = len(self.frames) - 1
+        if self.frame_i < max(0, self.playback_panel.GetLoop()[0] - 1):
+            self.frame_i = max(0, self.playback_panel.GetLoop()[0] - 1)
 
     def OnConnectorThinknessChanged(self, event):
         self.canvas.RENDER_CONFIG.CONNECTOR_RADIUS = event.GetEventObject().GetValue() / 2
@@ -213,6 +215,10 @@ class WorkerThread(Thread):
         if notify_window.is_playing == False:
             return
         notify_window.frame_i = (notify_window.frame_i + 1) % len(notify_window.frames)
+        if notify_window.frame_i > notify_window.playback_panel.GetLoop()[1] - 1:
+            notify_window.frame_i = notify_window.playback_panel.GetLoop()[0] - 1
+        if notify_window.frame_i < notify_window.playback_panel.GetLoop()[0] - 1:
+            notify_window.frame_i = notify_window.playback_panel.GetLoop()[0] - 1
         wx.PostEvent(self._notify_window, FrameNumberUpdateEvent(frame_number))
 
     def run(self):
