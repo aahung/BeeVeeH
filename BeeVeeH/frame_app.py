@@ -1,4 +1,5 @@
 import _thread
+import copy
 from threading import Thread
 import sched
 import time
@@ -61,7 +62,9 @@ class AppFrame(wx.Frame):
                                         self.OnSpeedChosen)
         self.styling_panel.bind_events(self.OnConnectorThinknessChanged,
                                        self.OnJointRadiusChanged,
-                                       self.OnHeadJointDoubleSizeChanged)
+                                       self.OnHeadJointDoubleSizeChanged,
+                                       self.OnSculptureModeChanged,
+                                       self.OnSculptureIntervalChanged)
         
 
         self.Bind(EVT_FRAME_NUMBER_UPDATE, self.OnFrameNumberUpdate)
@@ -81,6 +84,7 @@ class AppFrame(wx.Frame):
         self.frame_time = 0.1
         self.is_playing = False
         self.frames = None
+        self.sculpture_mode = False
         self.worker_thread = WorkerThread(self)
 
     def makeMenuBar(self):
@@ -146,7 +150,8 @@ class AppFrame(wx.Frame):
             self.Close()
 
     def OnFrameUpdate(self, event):
-        self.canvas.show_bvh_frame(self.root)
+        clean = event.frame_number == self.playback_panel.GetLoop()[0] or not self.sculpture_mode
+        self.canvas.show_bvh_frame(self.root, clean=clean)
         self.canvas.Refresh()
 
     def play_file(self, file_path, test):
@@ -206,6 +211,16 @@ class AppFrame(wx.Frame):
     def OnHeadJointDoubleSizeChanged(self, event):
         self.canvas.RENDER_CONFIG.HEAD_JOINT_DOUBLE_SIZE = event.IsChecked()
 
+    def OnSculptureModeChanged(self, event):
+        self.sculpture_mode = event.IsChecked()
+
+    def OnSculptureIntervalChanged(self, event):
+        try:
+            self.canvas.SculptureInterval = int(event.GetString())
+        except Exception as e:
+            # user hasn't finished typing yet
+            pass
+
     def OnSpeedChosen(self, event):
         self.speed = self.playback_panel.get_speed()
         self.worker_thread.set_interval(self.frame_time / self.speed)
@@ -225,9 +240,12 @@ class WorkerThread(Thread):
         notify_window = self._notify_window
         if not notify_window.frames:
             return
+        if notify_window.sculpture_mode and notify_window.is_playing:
+            notify_window.root = copy.deepcopy(notify_window.root)
         notify_window.root.load_frame(notify_window.frames[notify_window.frame_i][:]) # [:] is mandatory here
         frame_number = notify_window.frame_i + 1
-        wx.PostEvent(self._notify_window, FrameUpdateEvent())
+        wx.PostEvent(self._notify_window, FrameNumberUpdateEvent(frame_number))
+        wx.PostEvent(self._notify_window, FrameUpdateEvent(frame_number))
         if notify_window.is_playing == False:
             return
         notify_window.frame_i = (notify_window.frame_i + 1) % len(notify_window.frames)
@@ -235,7 +253,6 @@ class WorkerThread(Thread):
             notify_window.frame_i = notify_window.playback_panel.GetLoop()[0] - 1
         if notify_window.frame_i < notify_window.playback_panel.GetLoop()[0] - 1:
             notify_window.frame_i = notify_window.playback_panel.GetLoop()[0] - 1
-        wx.PostEvent(self._notify_window, FrameNumberUpdateEvent(frame_number))
 
     def run(self):
         notify_window = self._notify_window
@@ -257,7 +274,7 @@ def start(file_path=None, test=False):
         # no display
         print(e)
         return False
-    frame = AppFrame(None, title='BeeVeeH', size=(800, 600))
+    frame = AppFrame(None, title='BeeVeeH', size=(1000, 800))
     if file_path:
         frame.play_file(file_path, test)
     app.MainLoop()

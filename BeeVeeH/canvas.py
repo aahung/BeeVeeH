@@ -45,7 +45,7 @@ class BeeVeeHCanvas(glcanvas.GLCanvas):
         self.Bind(wx.EVT_MOTION, self.OnMouseMotion)
         self.Bind(wx.EVT_MOUSEWHEEL, self.OnMouseWheel)
 
-        self.bvh_root = None
+        self.bvh_roots = []
 
         # camera control
         self.camera_position = np.array([200.0, 200.0, 200.0])
@@ -65,6 +65,9 @@ class BeeVeeHCanvas(glcanvas.GLCanvas):
 
         self.RENDER_CONFIG = RENDER_CONFIG
         self.ground_texture = None
+
+        self.SculptureInterval = 3
+        self.SculptureMaxFrames = 20
 
     def OnSize(self, event):
         self.size = self.GetClientSize()
@@ -183,9 +186,14 @@ class BeeVeeHCanvas(glcanvas.GLCanvas):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         self.draw_ground()
- 
-        if self.bvh_root:
-            render(self.bvh_root)
+    
+        n_frame = len(self.bvh_roots)
+        if n_frame > 0:
+            sculpture_roots = self.bvh_roots[::self.SculptureInterval]
+            for bvh_root in sculpture_roots:
+                render(bvh_root)
+            if sculpture_roots[-1] != self.bvh_roots[-1]:
+                render(self.bvh_roots[-1])
 
         if self.size is None:
             self.size = self.GetClientSize()
@@ -239,5 +247,11 @@ class BeeVeeHCanvas(glcanvas.GLCanvas):
         self.update_camera()
             
 
-    def show_bvh_frame(self, bvh_root):
-        self.bvh_root = bvh_root
+    def show_bvh_frame(self, bvh_root, clean=True):
+        if clean:
+            self.bvh_roots = []
+        if len(self.bvh_roots) > 0 and self.bvh_roots[-1] == bvh_root:
+            return
+        self.bvh_roots.append(bvh_root)
+        if len(self.bvh_roots) >= self.SculptureInterval * (1 + self.SculptureMaxFrames):
+            self.bvh_roots = self.bvh_roots[-self.SculptureInterval * self.SculptureMaxFrames:]
