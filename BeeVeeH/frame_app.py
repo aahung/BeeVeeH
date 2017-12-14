@@ -78,6 +78,9 @@ class AppFrame(wx.Frame):
         panel.SetSizer(vbox)
         panel.Layout()
 
+        # Fix widget "flickering" on Windows
+        self.SetDoubleBuffered(True)
+
         self.Centre()
         self.Show()
 
