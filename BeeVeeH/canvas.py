@@ -235,7 +235,7 @@ class BeeVeeHCanvas(glcanvas.GLCanvas):
 
     def OnMouseWheel(self, event):
         sensitivity = 0.1
-        self.camera_position -= self.camera_front * event.GetWheelRotation()
+        self.camera_position += self.camera_front * event.GetWheelRotation()
         self.update_camera()
             
 
