@@ -20,3 +20,13 @@ class FrameUpdateEvent(wx.PyEvent):
     def __init__(self):
         wx.PyEvent.__init__(self)
         self.SetEventType(EVT_FRAME_UPDATE_ID)
+
+'''
+FRAME_NUMBER_UPDATE event
+'''
+EVT_NEED_REFRESH_ID = wx.NewEventType()
+EVT_NEED_REFRESH = wx.PyEventBinder(EVT_NEED_REFRESH_ID, 1)
+class NeedFreshEvent(wx.PyEvent):
+    def __init__(self):
+        wx.PyEvent.__init__(self)
+        self.SetEventType(EVT_NEED_REFRESH_ID)

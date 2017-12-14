@@ -39,7 +39,7 @@ class AppFrame(wx.Frame):
 
         self.CreateStatusBar()
 
-        self.SetStatusText("Welcome to BeeVeeH!")
+        self.SetStatusText("Welcome to BeeVeeH! Command/Ctrl-O to open a file.")
 
         panel = wx.Panel(self)
 
@@ -66,14 +66,22 @@ class AppFrame(wx.Frame):
 
         self.Bind(EVT_FRAME_NUMBER_UPDATE, self.OnFrameNumberUpdate)
         self.Bind(EVT_FRAME_UPDATE, self.OnFrameUpdate)
+        self.Bind(EVT_NEED_REFRESH, self.ForceRefresh)
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
 
         vbox.Add(self.playback_panel, 0, wx.EXPAND | wx.ALL, 0)
         vbox.Add(self.styling_panel, 0, wx.EXPAND | wx.ALL, 0)
 
         panel.SetSizer(vbox)
+        panel.Layout()
 
         self.Centre()
         self.Show()
+
+        self.frame_time = 0.1
+        self.is_playing = False
+        self.frames = None
+        self.worker_thread = WorkerThread(self)
 
     def makeMenuBar(self):
         fileMenu = wx.Menu()
@@ -119,13 +127,17 @@ class AppFrame(wx.Frame):
                       "BeeVeeH",
                       wx.OK|wx.ICON_INFORMATION)
 
+    def ForceRefresh(self, event):
+        self.SetSize(self.GetSize())
+        self.Refresh()
+        self.Update()
+
     def GetGLExtents(self):
         return self.GetClientSize()
 
-    def Close(self):
-        if hasattr(self, 'worker_thread') and self.worker_thread is not None:
-            self.worker_thread.stop()
-        super(wx.Frame, self).Close()
+    def OnClose(self, event):
+        self.worker_thread.stop()
+        event.Skip()
 
     def OnFrameNumberUpdate(self, event):
         # this update makes animation not smooth
@@ -150,10 +162,7 @@ class AppFrame(wx.Frame):
             self.frames = self.frames[:100]
         self.frame_i = 0;
         self.playback_panel.set_slider_range(1, len(self.frames))
-        if not hasattr(self, 'worker_thread') or self.worker_thread is None:
-            self.worker_thread = WorkerThread(self)
-        else:
-            self.worker_thread.set_interval(self.frame_time)
+        self.worker_thread.set_interval(self.frame_time)
 
     def play(self):
         self.is_playing = True
@@ -205,11 +214,18 @@ class WorkerThread(Thread):
     def __init__(self, notify_window):
         Thread.__init__(self)
         self._notify_window = notify_window
+        self.did_force_refresh_frame = False
         self.start()
 
     def loop(self):
+        if not self.did_force_refresh_frame:
+            wx.PostEvent(self._notify_window, NeedFreshEvent())
+            self.did_force_refresh_frame = True
+
         notify_window = self._notify_window
-        notify_window.root.load_frame(notify_window.frames[notify_window.frame_i][:]) # [:] is mandatory here
+        if not notify_window.frames:
+            return
+            notify_window.root.load_frame(notify_window.frames[notify_window.frame_i][:]) # [:] is mandatory here
         frame_number = notify_window.frame_i + 1
         wx.PostEvent(self._notify_window, FrameUpdateEvent())
         if notify_window.is_playing == False:
@@ -241,9 +257,8 @@ def start(file_path=None, test=False):
         # no display
         print(e)
         return False
-    frm = AppFrame(None, title='BeeVeeH', size=(800, 600))
-    frm.Show()
+    frame = AppFrame(None, title='BeeVeeH', size=(800, 600))
     if file_path:
-        frm.play_file(file_path, test)
+        frame.play_file(file_path, test)
     app.MainLoop()
     return True
