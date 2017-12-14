@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/Aahung/BeeVeeH.svg?branch=master)](https://travis-ci.org/Aahung/BeeVeeH)
 [![Coverage Status](https://coveralls.io/repos/github/Aahung/BeeVeeH/badge.svg?branch=master)](https://coveralls.io/github/Aahung/BeeVeeH?branch=master)
+[![Dependency Status](https://beta.gemnasium.com/badges/github.com/Aahung/BeeVeeH.svg)](https://beta.gemnasium.com/projects/github.com/Aahung/BeeVeeH)
 
 - Table of Content
   - [Development](#development)
