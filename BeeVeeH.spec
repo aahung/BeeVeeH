@@ -36,5 +36,6 @@ app = BUNDLE(coll,
              icon='BeeVeeH.icns',
              bundle_identifier=None,
              info_plist={
-               'NSHighResolutionCapable': 'True'
+               'NSHighResolutionCapable': 'True',
+               'CFBundleShortVersionString': '0.1.0'
              })
