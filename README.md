@@ -135,7 +135,6 @@ print('number of frame = %d' % len(frames))
 root.load_frame(frames[4])
 root.apply_transformation()
 print(root.str(show_coordinates=True))
-
 # Node(Hips), offset(0.0, 0.0, 0.0)
 #     World coordinates: (18.94, 35.04, -9.44)
 #     Channels:
@@ -157,13 +156,30 @@ print(root.str(show_coordinates=True))
 #                 Channel(Xrotation) = 9.3583
 #                 ...
 
+print(root.search_node('Head').str(show_coordinates=True))
+# Node(Head), offset(0.0, 6.84636, 0.0)
+#     World coordinates: (23.03, 59.50, -10.77)
+#     Channels:
+#         Channel(Xrotation) = -5.4518
+#         Channel(Yrotation) = -2.1447
+#         Channel(Zrotation) = -0.3752
 
 node = root.children[1]
 print('The world coordinates of JOINT %s at frames[4] is (%.2f, %.2f, %.2f)' \
 	   % (node.name, node.coordinates[0], 
 	      node.coordinates[1], node.coordinates[2]))
-
 # The world coordinates of JOINT RightUpLeg at frames[4] is (18.10, 35.16, -6.24)
+
+
+root.frame_distance(frames[0], frames[0])
+# 0.0
+
+root.frame_distance(frames[0], frames[1])
+# 7.5706251988920146
+
+root.search_node('Head').weight = 100.0
+root.frame_distance(frames[0], frames[1])
+# 34.952071657201969
 ```
 
 
@@ -171,11 +187,11 @@ print('The world coordinates of JOINT %s at frames[4] is (%.2f, %.2f, %.2f)' \
 
 #### `BVH.loads`(string): (`BVH.BVHNode`, `[[float]]`, `float`)
 
-`BVH.loads()` will parse a string (in BVH format) and return the root node, frames and time between two frames. Each frame is one sample of motion data in the form of a float list. The float numbers appear in the order of the channels.
+> `BVH.loads()` will parse a string (in BVH format) and return the root node, frames and time between two frames. Each frame is one sample of motion data in the form of a float list. The float numbers appear in the order of the channels.
 
 #### `BVH.load`(file_path): (`BVH.BVHNode`, `[[float]]`, `float`)
 
-`BVH.load()` will parse a BVH file and return the root node, frames and time between two frames. Refer to `BVH.loads` for more details.
+> `BVH.load()` will parse a BVH file and return the root node, frames and time between two frames. Refer to `BVH.loads` for more details.
 
 
 
@@ -185,41 +201,53 @@ print('The world coordinates of JOINT %s at frames[4] is (%.2f, %.2f, %.2f)' \
 
 ##### `name`: `string` 
 
-the name of the node.
+> the name of the node.
 
 ##### `children`: `[BVH.BVHNode]` 
 
-the list of children nodes.
+> the list of children nodes.
 
 ##### `channels`: `[BVH.BVHChannel]` 
 
-the list of channels. Accessing `channel.value` requires calling `BVH.BVHNode.load_frame()` first.
+> the list of channels. Accessing `channel.value` requires calling `BVH.BVHNode.load_frame()` first.
 
 ##### `offsets`: `[float]` 
 
-the offsets, in the form of [x, y, z].
+> the offsets, in the form of [x, y, z].
 
 ##### `coordinates`: `numpy.ndarray`
 
-the world coordinates, with shape=(3, 1). Accessing it requires calling `BVH.BVHNode.load_frame()` and `BVH.BVHNode.apply_transformation()` first.
+> the world coordinates, with shape=(3, 1). Accessing it requires calling `BVH.BVHNode.load_frame()` and `BVH.BVHNode.apply_transformation()` first.
+
+##### `weight`: `float`
+
+> the weight for frame distance calculation.
 
 #### Methods
 
 ##### `__init__`(self, name, offsets, channel_names, children)
 
-Constructor. 
+> Constructor. 
+
+##### `search_node`(self, name): `BVH.BVHNode`
+
+> `search_node` searches node recursively by name, returns `None` if not found.
 
 ##### `load_frame`(self, frame\_data_array)
 
-`load_frame()` assigns a frame. It will map the motion data to each channel. You can get the list of "frame\_data_array" from `BVH.load()` or `BVH.loads()`.
+> `load_frame()` assigns a frame. It will map the motion data to each channel. You can get the list of "frame\_data_array" from `BVH.load()` or `BVH.loads()`.
 
 ##### `apply_transformation`(self, parent\_tran\_matrix=np.identity(4))
 
-`apply_transformation()` starts the calculation of world coordinates. Call this method on the root BVHNode only (no parameter needed).
+> `apply_transformation()` starts the calculation of world coordinates. Call this method on the root BVHNode only (no parameter needed).
 
 ##### `str`(self, show_coordinates=False): `string`
 
-`str()` returns a readable string containing information about the node and its childrens. Before setting `show_coordinates=True`, make sure call `BVH.BVHNode.load_frame()` and `BVH.BVHNode.apply_transformation()` first.
+> `str()` returns a readable string containing information about the node and its childrens. Before setting `show_coordinates=True`, make sure call `BVH.BVHNode.load_frame()` and `BVH.BVHNode.apply_transformation()` first.
+
+##### `frame_distance`(self, frame_a, frame_b): `float`
+
+> `frame_distance` calculates the Euclidean distances of all joints between two frames, and returns the weighted sum.
 
 
 
@@ -229,26 +257,26 @@ Constructor.
 
 ##### `name`: `string`
 
-the name of the channel.
+> the name of the channel.
 
 ##### `value`: `float`
 
-the value of the channel, in degree when the channel represents a rotation. Accessing it requires calling `BVH.BVHNode.load_frame()` first.
+> the value of the channel, in degree when the channel represents a rotation. Accessing it requires calling `BVH.BVHNode.load_frame()` first.
 
 #### Methods
 
 ##### `__init__`(self, name)
 
-Constructor.
+> Constructor.
 
 ##### `set_value`(self, value)
 
-`set_value()` is the setter for `value`.
+> `set_value()` is the setter for `value`.
 
 ##### `matrix`(self): `numpy.ndarray`
 
-`matrix()` returns the transformation matrix of the channel.
+> `matrix()` returns the transformation matrix of the channel.
 
 ##### `str`(self)
 
-`str()` returns a readable string containing information about the channel.
+> `str()` returns a readable string containing information about the channel.

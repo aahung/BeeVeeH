@@ -1,4 +1,5 @@
 import os
+import copy
 import BeeVeeH
 import BeeVeeH.bvh_helper as BVH
 import pytest
@@ -44,3 +45,30 @@ class TestCase():
             self.root.apply_transformation()
             TestCase.check_bvh_node_distance_against_parent(self.root)
             TestCase.check_bvh_node_above_ground(self.root)
+
+    def test_bvh_node_search(self):
+        file_path = '%s/0007_Cartwheel001.bvh' % BVH_DIR
+        self.root, self.frames, self.frame_time = BVH.load(file_path)
+        assert(self.root.search_node('Head') != None)
+
+    def set_all_weight_0(node):
+        node.weight = 0
+        for child in node.children:
+            TestCase.set_all_weight_0(child)
+
+    def test_bvh_node_distance(self):
+        file_path = '%s/0007_Cartwheel001.bvh' % BVH_DIR
+        self.root, self.frames, self.frame_time = BVH.load(file_path)
+        root2 = copy.deepcopy(self.root)
+        self.root.load_frame(self.frames[0])
+        self.root.apply_transformation()
+        root2.load_frame(self.frames[0])
+        root2.apply_transformation()
+        assert(BVH.BVHNode.distance(self.root, root2) == 0)
+        root2.load_frame(self.frames[1])
+        root2.apply_transformation()
+        assert(BVH.BVHNode.distance(self.root, root2) > 0)
+        assert(BVH.BVHNode.distance(self.root, root2) == self.root.frame_distance(self.frames[0], self.frames[1]))
+        TestCase.set_all_weight_0(self.root)
+        TestCase.set_all_weight_0(root2)
+        assert(BVH.BVHNode.distance(self.root, root2) == 0)

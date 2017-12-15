@@ -1,5 +1,6 @@
 import bvh as BVHLIB
 import math
+import copy
 import numpy as np
 
 class BVHChannel(object):
@@ -44,18 +45,37 @@ class BVHChannel(object):
         return 'Channel({name}) = {value}'.format(name=self.name, value=self.value)
 
 class BVHNode(object):
-    def __init__(self, name, offsets, channel_names, children):
+    def __init__(self, name, offsets, channel_names, children, weight=1):
         super().__init__()
         self.name = name
         self.children = children # []
         self.channels = [BVHChannel(cn) for cn in channel_names] # []
         self.offsets = offsets # x, y, z
+        # weight for calculate frame-frame distance
+        self.weight = weight
 
-    def load_frame(self, frame_data_array):
+    def search_node(self, name):
+        if self.name == name:
+            return self
+        for child in self.children:
+            result = child.search_node(name)
+            if result:
+                return result
+        return None
+
+    def __load_frame(self, frame_data_array):
+        ''' 
+            this function modify frame_data_array, so 
+            make sure you only call load_frame instead of this
+        '''
         for channel in self.channels:
             channel.set_value(frame_data_array.pop(0))
         for child in self.children:
-            child.load_frame(frame_data_array)
+            child.__load_frame(frame_data_array)
+
+    def load_frame(self, frame_data_array):
+        frame_data_array = copy.copy(frame_data_array)
+        self.__load_frame(frame_data_array)
 
     def apply_transformation(self, parent_tran_matrix=np.identity(4)):
         self.coordinates = np.zeros((3,1))
@@ -92,6 +112,21 @@ class BVHNode(object):
                 s = s + '\t' + line + '\n'
         return s
 
+    def distance(node_a, node_b):
+        assert(node_a.name == node_b.name and node_a.weight == node_b.weight)
+        distance = np.linalg.norm(node_a.coordinates - node_b.coordinates) * node_a.weight
+        for child_a, child_b in zip(node_a.children, node_b.children):
+            distance += BVHNode.distance(child_a, child_b)
+        return distance
+
+    def frame_distance(self, frame_a, frame_b):
+        root_a = copy.deepcopy(self)
+        root_a.load_frame(frame_a)
+        root_a.apply_transformation()
+        root_b = copy.deepcopy(self)
+        root_b.load_frame(frame_b)
+        root_b.apply_transformation()
+        return BVHNode.distance(root_a, root_b)
 
 
 def parse_bvh_node(bvhlib_node):
