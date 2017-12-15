@@ -10,6 +10,8 @@
 [![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/aahung/beeveeh.svg)](https://github.com/Aahung/BeeVeeH/releases)
 
 - Table of Content
+  - [Download](https://github.com/Aahung/BeeVeeH/releases)
+  - [Introduction](#introduction)
   - [Development](#development)
     - [Requirements](#requirements)
     - [Setup](#setup)
@@ -24,6 +26,9 @@
 
 ![BeeVeeH Screenshot](screenshot.png)
 
+## Introduction
+
+BeeVeeH is a BVH player written in Python. BeeVeeH uses OpenGL to render and controls including camera, playback and styling are available. Sculpture mode is for making some "motion sculptures" but with a limitation of 20 sculptures in total (you might want to increase it [here](https://github.com/Aahung/BeeVeeH/blob/master/BeeVeeH/canvas.py) if you have a powerful graphic card). BeeVeeH is available for all platforms and pre-built binaries could be found at [the release page](https://github.com/Aahung/BeeVeeH/releases). For Ubuntu users, make sure you install appropriate OpenGL packages (for example, [freeGLUT](http://freeglut.sourceforge.net)). I haven't tested on native Ubuntu, and encountered some UI problems when running in VM.
 
 ## Development
 
