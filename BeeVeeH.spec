@@ -38,5 +38,5 @@ app = BUNDLE(coll,
              bundle_identifier=None,
              info_plist={
                'NSHighResolutionCapable': 'True',
-               'CFBundleShortVersionString': '0.2.0'
+               'CFBundleShortVersionString': '0.2.1'
              })
