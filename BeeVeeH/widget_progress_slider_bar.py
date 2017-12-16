@@ -18,9 +18,9 @@ class ProgressSliderBar(wx.Panel):
         self.Bind(wx.EVT_LEFT_UP, self.OnLeftMouseUp)
         self.Bind(wx.EVT_MOTION, self.OnMouseMotion)
 
-        self.range = None
-        self.loop = None
-        self.value = None
+        self.range = [1, 2]
+        self.loop = [1, 2]
+        self.value = 1
 
         self.sliding_knob = 0
 
