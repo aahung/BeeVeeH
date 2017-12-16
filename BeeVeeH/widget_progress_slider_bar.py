@@ -26,7 +26,7 @@ class ProgressSliderBar(wx.Panel):
 
         self.has_init = False
 
-    def paint_value_knob(self):
+    def paint_value_knob(self, dc):
         # draw the value knob
         w, h = self.GetSize()
 
@@ -38,17 +38,17 @@ class ProgressSliderBar(wx.Panel):
 
         # draw current value label
         string = '%d' % self.value
-        width, height = self.dc.GetTextExtent(string)
-        self.dc.DrawText(string, x - width // 2, h // 2 + self.slider_height // 2 + self.text_margin)
+        width, height = dc.GetTextExtent(string)
+        dc.DrawText(string, x - width // 2, h // 2 + self.slider_height // 2 + self.text_margin)
 
-        self.dc.SetPen(wx.Pen('#000000'))
-        self.dc.SetBrush(wx.Brush('#000000'))
-        self.dc.DrawRectangle(x - self.knob_width // 2, h // 2 - self.knob_height // 2, self.knob_width, self.knob_height)
+        dc.SetPen(wx.Pen('#000000'))
+        dc.SetBrush(wx.Brush('#000000'))
+        dc.DrawRectangle(x - self.knob_width // 2, h // 2 - self.knob_height // 2, self.knob_width, self.knob_height)
 
-        self.dc.DrawRectangle(self.value_knob_head_x0, self.value_knob_head_y0, 
+        dc.DrawRectangle(self.value_knob_head_x0, self.value_knob_head_y0, 
                               self.knob_head_size, self.knob_head_size)
 
-    def paint_loop_knob(self, i):
+    def paint_loop_knob(self, dc, i):
         w, h = self.GetSize()
 
         x = self.slider_margin + (self.loop[i] - self.range[0]) * self.x_per_increment
@@ -67,20 +67,20 @@ class ProgressSliderBar(wx.Panel):
 
         # draw label
         string = '%d' % self.loop[i]
-        width, height = self.dc.GetTextExtent(string)
-        self.dc.DrawText(string, x - width // 2, h // 2 - self.slider_height // 2 - self.text_margin - height)
+        width, height = dc.GetTextExtent(string)
+        dc.DrawText(string, x - width // 2, h // 2 - self.slider_height // 2 - self.text_margin - height)
 
-        self.dc.SetPen(wx.Pen('#1D5273'))
-        self.dc.SetBrush(wx.Brush('#1D5273'))
-        self.dc.DrawRectangle(x - self.knob_width // 2, h // 2 - self.knob_height // 2, self.knob_width, self.knob_height)
+        dc.SetPen(wx.Pen('#1D5273'))
+        dc.SetBrush(wx.Brush('#1D5273'))
+        dc.DrawRectangle(x - self.knob_width // 2, h // 2 - self.knob_height // 2, self.knob_width, self.knob_height)
 
-        self.dc.DrawRectangle(self.loop_knob_head_x0[i], self.loop_knob_head_y0[i], 
+        dc.DrawRectangle(self.loop_knob_head_x0[i], self.loop_knob_head_y0[i], 
                               self.knob_head_size, self.knob_head_size)
 
     def OnPaint(self, event):
     
-        self.dc = wx.PaintDC(self)
-        self.dc.SetFont(self.font)
+        dc = wx.PaintDC(self)
+        dc.SetFont(self.font)
         w, h = self.GetSize()
 
         if not self.has_init:
@@ -95,23 +95,23 @@ class ProgressSliderBar(wx.Panel):
         if self.range:
             # draw start and end label
             string = '%d' % self.range[0]
-            width, height = self.dc.GetTextExtent(string)
-            self.dc.DrawText(string, self.slider_margin - self.knob_width - width, h // 2 - height // 2)
+            width, height = dc.GetTextExtent(string)
+            dc.DrawText(string, self.slider_margin - self.knob_width - width, h // 2 - height // 2)
 
             string = '%d' % self.range[1]
-            width, height = self.dc.GetTextExtent(string)
+            width, height = dc.GetTextExtent(string)
             # update margin, large enough to locate the label
             self.slider_margin = max(self.slider_margin, width + self.knob_width)
-            self.dc.DrawText(string, w - self.slider_margin + self.knob_width, h // 2 - height // 2)
+            dc.DrawText(string, w - self.slider_margin + self.knob_width, h // 2 - height // 2)
 
-            self.dc.SetPen(wx.Pen('#000000'))
-            self.dc.SetBrush(wx.Brush('#ffffff'))
-            self.dc.DrawRectangle(self.slider_margin, (h - self.slider_height) // 2, w - 2 * self.slider_margin, self.slider_height)
+            dc.SetPen(wx.Pen('#000000'))
+            dc.SetBrush(wx.Brush('#ffffff'))
+            dc.DrawRectangle(self.slider_margin, (h - self.slider_height) // 2, w - 2 * self.slider_margin, self.slider_height)
 
             self.x_per_increment = ((w - 2 * self.slider_margin) / (self.range[1] - self.range[0]))
-            self.paint_value_knob()
-            self.paint_loop_knob(0)
-            self.paint_loop_knob(1)
+            self.paint_value_knob(dc)
+            self.paint_loop_knob(dc, 0)
+            self.paint_loop_knob(dc, 1)
 
     def OnSize(self, event):
         self.Refresh()
