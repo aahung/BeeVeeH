@@ -1,16 +1,16 @@
 # <img src='BeeVeeH-small.png' title='BeeVeeH' width='60' height='60' /> BeeVeeH - another BVH Player
 
-[![Build Status](https://travis-ci.org/Aahung/BeeVeeH.svg?branch=master)](https://travis-ci.org/Aahung/BeeVeeH)
-[![Coverage Status](https://coveralls.io/repos/github/Aahung/BeeVeeH/badge.svg?branch=master)](https://coveralls.io/github/Aahung/BeeVeeH?branch=master)
-[![Dependency Status](https://beta.gemnasium.com/badges/github.com/Aahung/BeeVeeH.svg)](https://beta.gemnasium.com/projects/github.com/Aahung/BeeVeeH)
-[![GitHub license](https://img.shields.io/github/license/Aahung/BeeVeeH.svg)](https://github.com/Aahung/BeeVeeH/blob/master/LICENSE)
-[![GitHub last commit](https://img.shields.io/github/last-commit/aahung/beeveeh.svg)](https://github.com/Aahung/BeeVeeH/commits/master)
+[![Build Status](https://travis-ci.org/aahung/BeeVeeH.svg?branch=master)](https://travis-ci.org/aahung/BeeVeeH)
+[![Coverage Status](https://coveralls.io/repos/github/aahung/BeeVeeH/badge.svg?branch=master)](https://coveralls.io/github/aahung/BeeVeeH?branch=master)
+[![Dependency Status](https://beta.gemnasium.com/badges/github.com/aahung/BeeVeeH.svg)](https://beta.gemnasium.com/projects/github.com/aahung/BeeVeeH)
+[![GitHub license](https://img.shields.io/github/license/aahung/BeeVeeH.svg)](https://github.com/aahung/BeeVeeH/blob/master/LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/aahung/beeveeh.svg)](https://github.com/aahung/BeeVeeH/commits/master)
 [![GitHub top language](https://img.shields.io/github/languages/top/aahung/beeveeh.svg)](#)
-[![GitHub repo size in bytes](https://img.shields.io/github/repo-size/aahung/beeveeh.svg)](https://github.com/Aahung/BeeVeeH/archive/master.zip)
-[![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/aahung/beeveeh.svg)](https://github.com/Aahung/BeeVeeH/releases)
+[![GitHub repo size in bytes](https://img.shields.io/github/repo-size/aahung/beeveeh.svg)](https://github.com/aahung/BeeVeeH/archive/master.zip)
+[![GitHub (Pre-)Release Date](https://img.shields.io/github/release-date-pre/aahung/beeveeh.svg)](https://github.com/aahung/BeeVeeH/releases)
 
 - Table of Content
-  - [Download](https://github.com/Aahung/BeeVeeH/releases)
+  - [Download](https://github.com/aahung/BeeVeeH/releases)
   - [Introduction](#introduction)
   - [Development](#development)
     - [Requirements](#requirements)
@@ -28,7 +28,7 @@
 
 ## Introduction
 
-BeeVeeH is a BVH player written in Python. BeeVeeH uses OpenGL to render and controls including camera, playback and styling are available. Sculpture mode is for making some "motion sculptures" but with a limitation of 20 sculptures in total (you might want to increase it [here](https://github.com/Aahung/BeeVeeH/blob/master/BeeVeeH/canvas.py) if you have a powerful graphic card). BeeVeeH is available for all platforms and pre-built binaries could be found at [the release page](https://github.com/Aahung/BeeVeeH/releases). For Ubuntu users, make sure you install appropriate OpenGL packages (for example, [freeGLUT](http://freeglut.sourceforge.net)). BeeVeeH haven't been tested on Ubuntu outside VM, and seems to crash on Ubuntu 17.\*.
+BeeVeeH is a BVH player written in Python. BeeVeeH uses OpenGL to render and controls including camera, playback and styling are available. Sculpture mode is for making some "motion sculptures" but with a limitation of 20 sculptures in total (you might want to increase it [here](https://github.com/aahung/BeeVeeH/blob/master/BeeVeeH/canvas.py) if you have a powerful graphic card). BeeVeeH is available for all platforms and pre-built binaries could be found at [the release page](https://github.com/aahung/BeeVeeH/releases). For Ubuntu users, make sure you install appropriate OpenGL packages (for example, [freeGLUT](http://freeglut.sourceforge.net)). BeeVeeH haven't been tested on Ubuntu outside VM, and seems to crash on Ubuntu 17.\*.
 
 ## Development
 
@@ -171,8 +171,8 @@ print(root.search_node('Head').str(show_coordinates=True))
 
 node = root.children[1]
 print('The world coordinates of JOINT %s at frames[4] is (%.2f, %.2f, %.2f)' \
-	   % (node.name, node.coordinates[0], 
-	      node.coordinates[1], node.coordinates[2]))
+       % (node.name, node.coordinates[0], 
+          node.coordinates[1], node.coordinates[2]))
 # The world coordinates of JOINT RightUpLeg at frames[4] is (18.10, 35.16, -6.24)
 
 
