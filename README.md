@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/aahung/BeeVeeH.svg?branch=master)](https://travis-ci.org/aahung/BeeVeeH)
 [![Coverage Status](https://coveralls.io/repos/github/aahung/BeeVeeH/badge.svg?branch=master)](https://coveralls.io/github/aahung/BeeVeeH?branch=master)
-[![Dependency Status](https://beta.gemnasium.com/badges/github.com/aahung/BeeVeeH.svg)](https://beta.gemnasium.com/projects/github.com/aahung/BeeVeeH)
 [![GitHub license](https://img.shields.io/github/license/aahung/BeeVeeH.svg)](https://github.com/aahung/BeeVeeH/blob/master/LICENSE)
 [![GitHub last commit](https://img.shields.io/github/last-commit/aahung/beeveeh.svg)](https://github.com/aahung/BeeVeeH/commits/master)
 [![GitHub top language](https://img.shields.io/github/languages/top/aahung/beeveeh.svg)](#)
